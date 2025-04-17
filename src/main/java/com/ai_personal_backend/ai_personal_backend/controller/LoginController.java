@@ -2,11 +2,15 @@ package com.ai_personal_backend.ai_personal_backend.controller;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ai_personal_backend.ai_personal_backend.service.UserLoginService;
+
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -14,9 +18,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequestMapping("/api/user")
 public class LoginController {
 
+    @Autowired
+    UserLoginService userLoginService;
+
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody @Valid LoginForm loginForm) {
-        return ResponseEntity.ok(Map.of("message", "ログイン成功"));
+    public ResponseEntity<?> loginUser(@RequestBody @Valid LoginForm loginForm, HttpSession session) {
+        try {
+            Long userId = userLoginService.login(loginForm);
+            session.setAttribute("userId", userId);
+            return ResponseEntity.ok(Map.of("message", "ログイン成功", "userId", userId));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", "ログイン失敗"));
+        }
+
     }
 
 }

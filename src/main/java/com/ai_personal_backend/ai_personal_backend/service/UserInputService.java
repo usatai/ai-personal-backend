@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.ai_personal_backend.ai_personal_backend.controller.SignupForm;
 import com.ai_personal_backend.ai_personal_backend.model.Users;
 import com.ai_personal_backend.ai_personal_backend.repository.UserInputRepository;
+import com.ai_personal_backend.ai_personal_backend.security.PasswordUtil;
 
 @Service
 public class UserInputService {
@@ -18,11 +19,12 @@ public class UserInputService {
     private Users createUser(SignupForm signupForm) {
         Users users = new Users();
         LocalDateTime now = LocalDateTime.now();
+        String hashedPassword = PasswordUtil.encodePassword(signupForm.userPassword());
 
-        users.setUser_name(signupForm.user_name());
-        users.setUser_email(signupForm.user_email());
-        users.setUser_password(signupForm.user_password());
-        users.setCreated_at(now);
+        users.setUserName(signupForm.userName());
+        users.setUserEmail(signupForm.userEmail());
+        users.setUserPassword(hashedPassword);
+        users.setCreatedAt(now);
 
         return users;
     }
@@ -32,7 +34,7 @@ public class UserInputService {
     }
 
     public Long getUserId(SignupForm signupForm) {
-        return userInputRepository.getUserId(signupForm.user_name(), signupForm.user_email());
+        return userInputRepository.getUserId(signupForm.userName(), signupForm.userEmail());
     }
 
 }

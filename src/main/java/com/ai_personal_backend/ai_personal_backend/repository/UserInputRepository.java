@@ -6,16 +6,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.ai_personal_backend.ai_personal_backend.model.Users;
+import java.util.Optional;
 
 @Repository
 public interface UserInputRepository extends JpaRepository<Users, Long> {
 
     // 新規登録時にユーザーのIDを取得
-    @Query(value = "SELECT id FROM users WHERE user_name = :user_name AND user_email = :user_email", nativeQuery = true)
-    Long getUserId(@Param("user_name") String user_name, @Param("user_email") String user_email);
+    @Query(value = "SELECT id FROM users WHERE user_name = :userName AND user_email = :userEmail", nativeQuery = true)
+    Long getUserId(@Param("userName") String userName, @Param("userEmail") String userEmail);
 
-    // ログインチェッククエリ
-    @Query(value = "SELECT id FROM users WHERE user_name = :user_name AND user_password = :user_password", nativeQuery = true)
-    Long login(@Param("user_name") String user_name, @Param("user_password") String user_password);
-
+    // ログイン時に該当ユーザーのパスワードを取得
+    Optional<Users> findByUserName(String userName);
 }

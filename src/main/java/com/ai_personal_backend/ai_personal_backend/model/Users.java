@@ -21,15 +21,15 @@ public class Users {
     private Long id;
 
     @Column(name = "user_name")
-    private String user_name;
+    private String userName;
 
     @Column(name = "user_email")
-    private String user_email;
+    private String userEmail;
 
     @Column(name = "user_password")
-    private String user_password;
+    private String userPassword;
 
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
 }

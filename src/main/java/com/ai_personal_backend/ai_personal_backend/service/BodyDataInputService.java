@@ -6,14 +6,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ai_personal_backend.ai_personal_backend.controller.BodyDataForm;
+import com.ai_personal_backend.ai_personal_backend.controller.BodyProgressDataForm;
 import com.ai_personal_backend.ai_personal_backend.model.BodyData;
+import com.ai_personal_backend.ai_personal_backend.model.BodyProgressData;
 import com.ai_personal_backend.ai_personal_backend.repository.BodyDataInputRepository;
+import com.ai_personal_backend.ai_personal_backend.repository.BodyProgressDataRepository;
 
 @Service
 public class BodyDataInputService {
 
     @Autowired
     BodyDataInputRepository bodyDataRepository;
+
+    @Autowired
+    BodyProgressDataRepository bodyProgressDataRepository;
 
     private BodyData bodyDataCreate(BodyDataForm bodyDataForm, Long userId) {
         LocalDateTime now = LocalDateTime.now();
@@ -30,12 +36,27 @@ public class BodyDataInputService {
         bodyData.setCreated_at(now);
 
         return bodyData;
+    }
 
+    private BodyProgressData progressBodyDataCreate(BodyProgressDataForm bodyProgressDataForm, Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        BodyProgressData bodyProgressData = new BodyProgressData();
+        bodyProgressData.setUserId(userId);
+        bodyProgressData.setProgressWeight(bodyProgressDataForm.progressWeight());
+        bodyProgressData.setProgressFat(bodyProgressDataForm.progressFat());
+        bodyProgressData.setCreatedAt(now);
+
+        return bodyProgressData;
     }
 
     // 体データを保存するメソッド
     public void bodyDataSave(BodyDataForm bodyDataForm, Long userId) {
         bodyDataRepository.save(bodyDataCreate(bodyDataForm, userId));
+    }
+
+    public void progressDataInput(BodyProgressDataForm bodyProgressDataForm, Long userId) {
+        bodyProgressDataRepository.save(progressBodyDataCreate(bodyProgressDataForm, userId));
     }
 
 }

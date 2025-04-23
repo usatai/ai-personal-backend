@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ai_personal_backend.ai_personal_backend.service.BodyDataInputService;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/bodydata")
@@ -74,9 +72,16 @@ public class BodyDataController {
                 form.user_target_period());
     }
 
-    @GetMapping("userinfo")
-    public String getMethodName(@RequestParam String param) {
-        return new String();
+    @PostMapping("progress")
+    public ResponseEntity<?> getMethodName(@RequestBody BodyProgressDataForm bodyProgressDataForm,
+            HttpSession session) {
+
+        Long userId = (Long) session.getAttribute("userId");
+
+        bodyDataInputService.progressDataInput(bodyProgressDataForm, userId);
+
+        return ResponseEntity.ok(Map.of("message", "登録成功"));
+
     }
 
 }

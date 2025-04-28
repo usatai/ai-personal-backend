@@ -1,5 +1,6 @@
 package com.ai_personal_backend.ai_personal_backend.controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ai_personal_backend.ai_personal_backend.model.BodyProgressData;
+import com.ai_personal_backend.ai_personal_backend.model.Food;
 import com.ai_personal_backend.ai_personal_backend.service.BodyDataInputService;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/bodydata")
@@ -81,6 +86,19 @@ public class BodyDataController {
         bodyDataInputService.progressDataInput(bodyProgressDataForm, userId);
 
         return ResponseEntity.ok(Map.of("message", "登録成功"));
+
+    }
+
+    @GetMapping("userinfo")
+    public ResponseEntity<?> userInfo(@RequestParam Long userId) {
+
+        LocalDateTime now = LocalDateTime.now();
+        // 体重・体脂肪取得
+        BodyProgressData progress = bodyDataInputService.getProgressData(userId, now);
+
+        float totalCarolies = bodyDataInputService.getFoodData(userId, now);
+
+        return ResponseEntity.ok(Map.of("progress", progress, "totalCarolies", totalCarolies));
 
     }
 

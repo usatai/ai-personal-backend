@@ -1,5 +1,6 @@
 package com.ai_personal_backend.ai_personal_backend.controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,10 @@ public class LoginController {
     public ResponseEntity<?> loginUser(@RequestBody @Valid LoginForm loginForm, HttpSession session) {
         try {
             Long userId = userLoginService.login(loginForm);
+            LocalDateTime createdAt = userLoginService.getCreatedAt(userId);
             session.setAttribute("userId", userId);
-            return ResponseEntity.ok(Map.of("message", "ログイン成功", "userId", userId));
+            session.setAttribute("createdAt", createdAt);
+            return ResponseEntity.ok(Map.of("message", "ログイン成功", "userId", userId, "createdAt", createdAt));
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("message", "ログイン失敗"));
         }

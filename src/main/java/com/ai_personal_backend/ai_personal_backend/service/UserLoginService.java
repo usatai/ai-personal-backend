@@ -1,5 +1,6 @@
 package com.ai_personal_backend.ai_personal_backend.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,12 @@ public class UserLoginService {
         }
 
         return user.getId();
+    }
+
+    public LocalDateTime getCreatedAt(Long userId) {
+
+        return userInputRepository.getCreatedAt(userId);
+
     }
 
 }

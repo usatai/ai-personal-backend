@@ -1,7 +1,12 @@
 package com.ai_personal_backend.ai_personal_backend.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -92,14 +97,36 @@ public class BodyDataController {
     @GetMapping("userinfo")
     public ResponseEntity<?> userInfo(@RequestParam Long userId) {
 
-        LocalDateTime now = LocalDateTime.now();
+        YearMonth ym = YearMonth.now();
+
+        LocalDateTime firstDayOfMonth = ym.atDay(1).atStartOfDay();
+        LocalDateTime lastDayOfmonth = ym.atEndOfMonth().plusDays(1).atStartOfDay();
         // 体重・体脂肪取得
-        BodyProgressData progress = bodyDataInputService.getProgressData(userId, now);
+        List<BodyProgressData> progress = bodyDataInputService.getProgressData(userId, firstDayOfMonth, lastDayOfmonth);
+        List<Food> foodData = bodyDataInputService.getFoodDataForMonth(userId, ym);
 
-        float totalCarolies = bodyDataInputService.getFoodData(userId, now);
+        List<Map<String, Object>> todayMonth = new ArrayList<>();
+        for (LocalDate date = ym.atDay(1); !date.isAfter(ym.atEndOfMonth()); date = date.plusDays(1)) {
+            final LocalDate copy = date;
+            Float weight = progress.stream()
+                    .filter(d -> d.getCreatedAt().toLocalDate().equals(copy))
+                    .map(d -> d.getProgressWeight())
+                    .findFirst()
+                    .orElse(0f);
 
-        return ResponseEntity.ok(Map.of("progress", progress, "totalCarolies", totalCarolies));
+            Float calories = foodData.stream()
+                    .filter(d -> d.getCreatedAt().toLocalDate().equals(copy))
+                    .map(d -> d.getCalories())
+                    .reduce(0f, Float::sum);
 
+            todayMonth.add(Map.of(
+                    "name", date.toString(),
+                    "weight", weight,
+                    "caloriesIntake", calories,
+                    "caloriesBurned", 2200 // 仮に固定値。あとで活動量計算できる
+            ));
+        }
+
+        return ResponseEntity.ok(Map.of("todayMonth", todayMonth));
     }
-
 }

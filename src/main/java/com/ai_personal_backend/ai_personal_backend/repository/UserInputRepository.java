@@ -6,6 +6,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.ai_personal_backend.ai_personal_backend.model.Users;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +19,7 @@ public interface UserInputRepository extends JpaRepository<Users, Long> {
 
     // ログイン時に該当ユーザーのパスワードを取得
     Optional<Users> findByUserName(String userName);
+
+    @Query(value = "SELECT created_at FROM users WHERE id = :userId", nativeQuery = true)
+    public LocalDateTime getCreatedAt(@Param("userId") Long userId);
 }

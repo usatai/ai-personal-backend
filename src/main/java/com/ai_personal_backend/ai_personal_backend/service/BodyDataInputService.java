@@ -1,9 +1,7 @@
 package com.ai_personal_backend.ai_personal_backend.service;
 
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,23 +74,9 @@ public class BodyDataInputService {
 
     }
 
-    // public Optional<Float> getFoodData(Long userId, LocalDateTime now) {
-
-    // List<Food> food = foodDataRepository.findFoodData(userId, now);
-
-    // if (food != null && !food.isEmpty()) {
-    // float totalCalories = (float) food.stream()
-    // .mapToDouble(data -> data.getCalories())
-    // .sum();
-    // return Optional.of(totalCalories);
-    // } else {
-    // return Optional.empty();
-    // }
-
-    // }
-
-    public List<Food> getFoodDataForMonth(Long userId, YearMonth ym) {
-        return foodDataRepository.findFoodData(userId, ym);
+    public List<Food> getFoodDataForMonth(Long userId, LocalDateTime firstDayOfMonth,
+            LocalDateTime lastDayOfMonth) {
+        return foodDataRepository.findFoodData(userId, firstDayOfMonth, lastDayOfMonth);
     }
 
 }

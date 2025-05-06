@@ -36,9 +36,7 @@ public class UserLoginService {
     }
 
     public LocalDateTime getCreatedAt(Long userId) {
-
         return userInputRepository.getCreatedAt(userId);
-
     }
 
 }

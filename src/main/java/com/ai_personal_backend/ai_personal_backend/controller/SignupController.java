@@ -8,11 +8,13 @@ import com.ai_personal_backend.ai_personal_backend.service.UserInputService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -27,7 +29,11 @@ public class SignupController {
     public ResponseEntity<?> signuuUser(@RequestBody @Valid SignupForm signupForm, BindingResult signupBindingResult,
             HttpSession session) {
         if (signupBindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(signupBindingResult.getAllErrors());
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError fieldError : signupBindingResult.getFieldErrors()) {
+                errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            }
+            return ResponseEntity.badRequest().body(errors);
         } else {
             userInputService.userInput(signupForm);
 

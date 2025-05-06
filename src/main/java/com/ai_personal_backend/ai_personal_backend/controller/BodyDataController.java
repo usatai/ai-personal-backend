@@ -4,11 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,8 @@ import com.ai_personal_backend.ai_personal_backend.service.BodyDataInputService;
 import com.ai_personal_backend.ai_personal_backend.service.ChatGptService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -90,15 +95,24 @@ public class BodyDataController {
     }
 
     @PostMapping("progress")
-    public ResponseEntity<?> getMethodName(@RequestBody BodyProgressDataForm bodyProgressDataForm,
+    public ResponseEntity<?> getMethodName(@RequestBody @Valid BodyProgressDataForm bodyProgressDataForm,BindingResult bodyBindingResult,
             HttpSession session) {
+        
+        if (bodyBindingResult.hasErrors()) {
+            Map<String,String> errors = new HashMap<>();
+            for (FieldError fieldError : bodyBindingResult.getFieldErrors()) {
+                errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            }
 
-        Long userId = (Long) session.getAttribute("userId");
+            return ResponseEntity.badRequest().body(errors);
+            
+        } else {
+            Long userId = (Long) session.getAttribute("userId");
 
-        bodyDataInputService.progressDataInput(bodyProgressDataForm, userId);
+            bodyDataInputService.progressDataInput(bodyProgressDataForm, userId);
 
-        return ResponseEntity.ok(Map.of("message", "登録成功"));
-
+            return ResponseEntity.ok(Map.of("message", "登録成功"));
+        }
     }
 
     @GetMapping("userinfo")

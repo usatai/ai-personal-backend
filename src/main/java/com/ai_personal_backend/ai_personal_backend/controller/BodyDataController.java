@@ -21,6 +21,7 @@ import com.ai_personal_backend.ai_personal_backend.model.BodyProgressData;
 import com.ai_personal_backend.ai_personal_backend.model.Food;
 import com.ai_personal_backend.ai_personal_backend.service.BodyDataInputService;
 import com.ai_personal_backend.ai_personal_backend.service.ChatGptService;
+import com.ai_personal_backend.ai_personal_backend.service.PfcSaveService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -38,25 +39,48 @@ public class BodyDataController {
     @Autowired
     ChatGptService chatGptService;
 
+    @Autowired
+    PfcSaveService pfcSaveService;
+
     @PostMapping("/input")
     public ResponseEntity<?> bodyDataInput(@RequestBody BodyDataForm bodyDataForm, HttpSession session) {
 
         Long userId = (Long) session.getAttribute("userId");
 
         // AIへのプロンプト作成
-        // String pronpt = generatePromptFromForm(bodyDataForm);
-        // String aiAdvice = chatGptService.ask(pronpt);
+        String pronpt = generatePromptFromForm(bodyDataForm);
+
+        // ChatGPTへの問い合わせ
+        String aiAdvice = chatGptService.ask(pronpt);
+
+        System.out.println(aiAdvice);
+
+        //PFC、カロリー抽出
+        PfcForm pfcForm = PfcParser.parse(aiAdvice);
 
         // 体情報のDB保存
         bodyDataInputService.bodyDataSave(bodyDataForm, userId);
 
-        return ResponseEntity.ok(Map.of("message", bodyDataForm));
+        // カロリー、PFC保存
+        pfcSaveService.savePfc(pfcForm,aiAdvice,userId);
+
+        return ResponseEntity.ok(Map.of("message", bodyDataForm,"aiAdvice", aiAdvice));
     }
 
     private String generatePromptFromForm(BodyDataForm form) {
         return String.format("""
-                あなたは優秀なパーソナルトレーナー兼管理栄養士です。
-                以下のクライアント情報をもとに、具体的かつ実行可能な「1ヶ月分の食事プラン」と「トレーニングメニュー概要」を日本語で提案してください。
+                あなたは経験豊富なパーソナルトレーナーかつ管理栄養士です。
+                以下のクライアント情報をもとに、目標達成に向けて実行可能で現実的な「1ヶ月分の食事プラン」と「トレーニングメニュー概要」を日本語で詳細に提案してください。
+
+                提案の際は、以下の点に特に留意してください:
+                - 日本人の平均的な食生活・生活リズムを考慮すること
+                - クライアントの目標タイプに合わせて、減量・健康・増量のいずれかに適切なカロリー収支とPFCバランスを設計すること
+                - 食事は家庭でも再現可能な簡単な献立にすること（市販食品も可）
+                - トレーニングはジム未利用であれば自重中心、自宅でできるよう工夫すること
+                - PFCの単位はgで、数値も明記すること
+                - 朝/昼/夕/間食の例は複数日分（例: 1週間分）提示すると望ましい
+                - クライアントの運動タイプによってトレーニングメニューを設計、提案すること
+                - トレーニングメニューは1週間で見て休養日も含めた設計にしてください
 
                 ▼クライアント情報
                 - 現在の身長: %scm
@@ -64,24 +88,30 @@ public class BodyDataController {
                 - 現在の体脂肪率: %s%%
                 - 目標体重: %skg
                 - 目標体脂肪率: %s%%
-                - 目標タイプ: %s
-                - 運動タイプ: $s
-                - 目標期間: %以内
+                - 目標タイプ: %s（例：ダイエット・筋肉増量・健康維持など）
+                - 運動タイプ: %s（例：ジム通い、宅トレ、ウォーキングなど）
+                - 目標期間: %s以内
 
-                出力形式は以下のようにしてください:
+                出力フォーマットは以下を厳守してください:
                 ---
                 【食事プラン】
-                ・1日の目標摂取カロリー及び目標PFCバランス
-                ・朝食:
-                ・昼食:
-                ・夕食:
-                ・間食（任意）:
+                ・1日の目標摂取カロリー:
+                ・目標PFCバランス（g）: タンパク質〇g / 脂質〇g / 炭水化物〇g
+                ・朝食例（複数日）:
+                ・昼食例（複数日）:
+                ・夕食例（複数日）:
+                ・間食例（任意）:
 
                 【トレーニング概要】
-                ・頻度（週◯回）:
-                ・主な種目:
-                ・筋トレ／有酸素の比率:
-                ・備考（フォーム、休養の取り方、栄養補助食品など）:
+                ・月:
+                ・火:
+                ・水:
+                ・木:
+                ・金:
+                ・土:
+                ・日:
+                ・主なトレーニングメニュー（部位ごとに分類可）:
+                ・備考（トレーニングの注意点、休養日、プロテインなどのサプリ活用など）:
                 ---
                 """,
                 form.user_height(),
@@ -105,7 +135,7 @@ public class BodyDataController {
             }
 
             return ResponseEntity.badRequest().body(errors);
-            
+
         } else {
             Long userId = (Long) session.getAttribute("userId");
 

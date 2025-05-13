@@ -38,6 +38,7 @@ public class BodyDataInputService {
         bodyData.setGoal_weight(bodyDataForm.user_goal_weight());
         bodyData.setGoal_body_fat(bodyDataForm.user_goal_fat());
         bodyData.setGoal_type(bodyDataForm.user_goal_Type());
+        bodyData.setSportType(bodyDataForm.user_sport_Type());
         bodyData.setTarget_period(bodyDataForm.user_target_period());
         bodyData.setCreated_at(now);
 

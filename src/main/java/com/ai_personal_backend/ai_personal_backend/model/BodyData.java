@@ -3,6 +3,7 @@ package com.ai_personal_backend.ai_personal_backend.model;
 import java.time.LocalDateTime;
 
 import com.ai_personal_backend.ai_personal_backend.enumFile.UserGoalType;
+import com.ai_personal_backend.ai_personal_backend.enumFile.UserSportType;
 
 import jakarta.persistence.*;
 
@@ -40,6 +41,9 @@ public class BodyData {
 
     @Column(name = "goal_type")
     private UserGoalType goal_type;
+
+    @Column(name = "sport_type")
+    private UserSportType sportType;
 
     @Column(name = "target_period")
     private String target_period;

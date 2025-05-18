@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 public class PfcParser {
     public static PfcForm parse(String aiResponse) {
         // 正規表現でPFCとカロリーを抽出
-        Pattern caloriePattern = Pattern.compile("目標摂取カロリー[:：]\\s*(\\d+)\\s*k?cal?");
-        Pattern pfcPattern = Pattern.compile("目標摂取PFC[:：]\\s*P\\s*(\\d+)g[^\\d]*F\\s*(\\d+)g[^\\d]*C\\s*(\\d+)g");
+        Pattern caloriePattern = Pattern.compile("[・]?[\\s　]*1日の目標摂取カロリー[:：]\\s*(\\d+)[kK]?[cC]?[aA]?[lL]?");
+        Pattern pfcPattern = Pattern.compile("タンパク質\\s*(\\d+(?:\\.\\d+)?)g\\s*/\\s*脂質\\s*(\\d+(?:\\.\\d+)?)g\\s*/\\s*炭水化物\\s*(\\d+(?:\\.\\d+)?)g");
 
         Matcher calMatcher = caloriePattern.matcher(aiResponse);
         Matcher pfcMatcher = pfcPattern.matcher(aiResponse);

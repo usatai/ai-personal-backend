@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ai_personal_backend.ai_personal_backend.model.AiResponseData;
 import com.ai_personal_backend.ai_personal_backend.model.BodyProgressData;
 import com.ai_personal_backend.ai_personal_backend.model.Food;
+import com.ai_personal_backend.ai_personal_backend.service.AiResponseDataService;
 import com.ai_personal_backend.ai_personal_backend.service.BodyDataInputService;
 import com.ai_personal_backend.ai_personal_backend.service.ChatGptService;
 import com.ai_personal_backend.ai_personal_backend.service.PfcSaveService;
@@ -42,6 +44,9 @@ public class BodyDataController {
     @Autowired
     PfcSaveService pfcSaveService;
 
+    @Autowired
+    AiResponseDataService aiResponseDataService;
+
     @PostMapping("/input")
     public ResponseEntity<?> bodyDataInput(@RequestBody BodyDataForm bodyDataForm, HttpSession session) {
 
@@ -52,8 +57,6 @@ public class BodyDataController {
 
         // ChatGPTへの問い合わせ
         String aiAdvice = chatGptService.ask(pronpt);
-
-        System.out.println(aiAdvice);
 
         //PFC、カロリー抽出
         PfcForm pfcForm = PfcParser.parse(aiAdvice);
@@ -78,7 +81,7 @@ public class BodyDataController {
                 - 食事は家庭でも再現可能な簡単な献立にすること（市販食品も可）
                 - トレーニングはジム未利用であれば自重中心、自宅でできるよう工夫すること
                 - PFCの単位はgで、数値も明記すること
-                - 朝/昼/夕/間食の例は複数日分（例: 1週間分）提示すると望ましい
+                - 朝/昼/夕/間食の例は複数日分（例: 各3日分）提示すると望ましい
                 - クライアントの運動タイプによってトレーニングメニューを設計、提案すること
                 - トレーニングメニューは1週間で見て休養日も含めた設計にしてください
 
@@ -88,8 +91,8 @@ public class BodyDataController {
                 - 現在の体脂肪率: %s%%
                 - 目標体重: %skg
                 - 目標体脂肪率: %s%%
-                - 目標タイプ: %s（例：ダイエット・筋肉増量・健康維持など）
-                - 運動タイプ: %s（例：ジム通い、宅トレ、ウォーキングなど）
+                - 目標タイプ: %s
+                - 運動タイプ: %s
                 - 目標期間: %s以内
 
                 出力フォーマットは以下を厳守してください:
@@ -165,6 +168,11 @@ public class BodyDataController {
         List<BodyProgressData> progress = bodyDataInputService.getProgressData(userId, firstDayOfMonth, lastDayOfMonth);
         List<Food> foodData = bodyDataInputService.getFoodDataForMonth(userId, firstDayOfMonth, lastDayOfMonth);
 
+        // AIアドバイス取得
+        AiResponseData aiResponseData = aiResponseDataService.getAiResponseDataByUserId(userId);
+        String aiAdvice = aiResponseData.getAiAdvice();
+        float TargetCalories = aiResponseData.getTargetCalorie();
+
         List<Map<String, Object>> todayMonth = new ArrayList<>();
         for (LocalDate date = ym.atDay(1); !date.isAfter(ym.atEndOfMonth()); date = date.plusDays(1)) {
             final LocalDate copy = date;
@@ -190,10 +198,10 @@ public class BodyDataController {
                     "weight", weight,
                     "fat", fat,
                     "caloriesIntake", calories,
-                    "caloriesBurned", 2200 // 仮に固定値。あとで活動量計算できる
+                    "caloriesBurned", TargetCalories// 仮に固定値。あとで活動量計算できる
             ));
         }
 
-        return ResponseEntity.ok(Map.of("todayMonth", todayMonth));
+        return ResponseEntity.ok(Map.of("todayMonth", todayMonth,"aiAdvice",aiAdvice));
     }
 }

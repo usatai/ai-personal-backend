@@ -22,9 +22,6 @@ public class AiResponseData {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "targetCalorie")
-    private Float targetCalorie;
-
     @Column
     private Float protein;
 
@@ -39,4 +36,7 @@ public class AiResponseData {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "target_calorie")
+    private Float targetCalorie;
 } 

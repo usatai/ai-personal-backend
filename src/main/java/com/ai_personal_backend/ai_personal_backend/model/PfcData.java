@@ -24,7 +24,7 @@ public class PfcData {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "targetCalorie")
+    @Column(name = "target_calorie")
     private float targetCalorie;
 
     @Column(name = "protein")

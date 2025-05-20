@@ -173,6 +173,7 @@ public class BodyDataController {
         String aiAdvice = aiResponseData.getAiAdvice();
         float TargetCalories = aiResponseData.getTargetCalorie();
 
+
         List<Map<String, Object>> todayMonth = new ArrayList<>();
         for (LocalDate date = ym.atDay(1); !date.isAfter(ym.atEndOfMonth()); date = date.plusDays(1)) {
             final LocalDate copy = date;

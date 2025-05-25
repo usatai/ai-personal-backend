@@ -154,6 +154,8 @@ public class BodyDataController {
             @RequestParam(required = false) Integer month, HttpSession session) {
 
         YearMonth ym;
+        LocalDate today = LocalDate.now();
+        YearMonth thisMonth = YearMonth.from(today);
 
         if (year != null && month != null) {
             ym = YearMonth.of(year, month);
@@ -173,9 +175,10 @@ public class BodyDataController {
         String aiAdvice = aiResponseData.getAiAdvice();
         float TargetCalories = aiResponseData.getTargetCalorie();
 
+        LocalDate lastDay = ym.equals(thisMonth) ? today : ym.atEndOfMonth();
 
         List<Map<String, Object>> todayMonth = new ArrayList<>();
-        for (LocalDate date = ym.atDay(1); !date.isAfter(ym.atEndOfMonth()); date = date.plusDays(1)) {
+        for (LocalDate date = ym.atDay(1); !date.isAfter(lastDay); date = date.plusDays(1)) {
             final LocalDate copy = date;
             Float weight = progress.stream()
                     .filter(d -> d.getCreatedAt().toLocalDate().equals(copy))

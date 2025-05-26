@@ -42,8 +42,8 @@ public class FoodDataController {
     }
 
     @GetMapping("/foodlist")
-    public List<NutritionData> getFoodList(@RequestParam String param) {
-        return nutririonDataRepository.findByNameContaining(param);
+    public List<NutritionData> getFoodList(@RequestParam(name = "query") String param) {
+        return nutririonDataRepository.findByFoodNameContaining(param);
     }
     
 

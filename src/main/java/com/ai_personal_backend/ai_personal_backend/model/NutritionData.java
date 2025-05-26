@@ -12,7 +12,6 @@ import lombok.Data;
 @Table(name = "nutrition_data")
 @Data
 public class NutritionData {
-
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

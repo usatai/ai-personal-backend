@@ -31,7 +31,7 @@ public class AiResponseData {
     @Column
     private Float carbohydrate;
 
-    @Column(name = "ai_advice")
+    @Column(name = "ai_advice",columnDefinition = "TEXT")
     private String aiAdvice;
 
     @Column(name = "created_at")

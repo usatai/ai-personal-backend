@@ -37,7 +37,7 @@ public class FoodDataController {
         for (FoodDataForm food : foodListForm.foods()) {
             foodDataService.input(food, userId, foodListForm.mealType());
         }
-
+        
         return ResponseEntity.ok(Map.of("message", "成功"));
     }
 

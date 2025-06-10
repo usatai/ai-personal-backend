@@ -37,8 +37,8 @@ public class BodyDataInputService {
         bodyData.setBody_fat(bodyDataForm.user_fat());
         bodyData.setGoal_weight(bodyDataForm.user_goal_weight());
         bodyData.setGoal_body_fat(bodyDataForm.user_goal_fat());
-        bodyData.setGoal_type(bodyDataForm.user_goal_Type());
-        bodyData.setSportType(bodyDataForm.user_sport_Type());
+        bodyData.setGoal_type(bodyDataForm.user_goal_type());
+        bodyData.setSportType(bodyDataForm.user_sport_type());
         bodyData.setTarget_period(bodyDataForm.user_target_period());
         bodyData.setCreated_at(now);
 
@@ -46,13 +46,13 @@ public class BodyDataInputService {
     }
 
     private BodyProgressData progressBodyDataCreate(BodyProgressDataForm bodyProgressDataForm, Long userId) {
-        LocalDateTime now = LocalDateTime.now();
+        // LocalDateTime now = LocalDateTime.now();
 
         BodyProgressData bodyProgressData = new BodyProgressData();
         bodyProgressData.setUserId(userId);
         bodyProgressData.setProgressWeight(bodyProgressDataForm.progressWeight());
         bodyProgressData.setProgressFat(bodyProgressDataForm.progressFat());
-        bodyProgressData.setCreatedAt(now);
+        bodyProgressData.setCreatedAt(bodyProgressDataForm.createdAt());
 
         return bodyProgressData;
     }

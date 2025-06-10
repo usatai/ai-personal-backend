@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,26 +49,29 @@ public class BodyDataController {
     AiResponseDataService aiResponseDataService;
 
     @PostMapping("/input")
-    public ResponseEntity<?> bodyDataInput(@RequestBody BodyDataForm bodyDataForm, HttpSession session) {
+    public ResponseEntity<?> bodyDataInput(@RequestBody @Valid BodyDataForm bodyDataForm,BindingResult bodyDataBindingResult,HttpSession session) {
+        if (bodyDataBindingResult.hasErrors()) {
+            System.out.println(bodyDataForm);
+            Map<String, String> errors = new HashMap<>();
+            for (FieldError fieldError : bodyDataBindingResult.getFieldErrors()) {
+                errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            }
+            return ResponseEntity.badRequest().body(errors);
+        } else {
+            Long userId = (Long) session.getAttribute("userId");
+            // AIへのプロンプト作成
+            String pronpt = generatePromptFromForm(bodyDataForm);
+            // ChatGPTへの問い合わせ
+            String aiAdvice = chatGptService.ask(pronpt);
+            //PFC、カロリー抽出
+            PfcForm pfcForm = PfcParser.parse(aiAdvice);
+            // 体情報のDB保存
+            bodyDataInputService.bodyDataSave(bodyDataForm, userId);
+            // カロリー、PFC保存
+            pfcSaveService.savePfc(pfcForm,aiAdvice,userId);
 
-        Long userId = (Long) session.getAttribute("userId");
-
-        // AIへのプロンプト作成
-        String pronpt = generatePromptFromForm(bodyDataForm);
-
-        // ChatGPTへの問い合わせ
-        String aiAdvice = chatGptService.ask(pronpt);
-
-        //PFC、カロリー抽出
-        PfcForm pfcForm = PfcParser.parse(aiAdvice);
-
-        // 体情報のDB保存
-        bodyDataInputService.bodyDataSave(bodyDataForm, userId);
-
-        // カロリー、PFC保存
-        pfcSaveService.savePfc(pfcForm,aiAdvice,userId);
-
-        return ResponseEntity.ok(Map.of("message", bodyDataForm,"aiAdvice", aiAdvice));
+            return ResponseEntity.ok(Map.of("message", bodyDataForm,"aiAdvice", aiAdvice));
+        }   
     }
 
     private String generatePromptFromForm(BodyDataForm form) {
@@ -122,8 +126,8 @@ public class BodyDataController {
                 form.user_fat(),
                 form.user_goal_weight(),
                 form.user_goal_fat(),
-                form.user_goal_Type(),
-                form.user_sport_Type(),
+                form.user_goal_type(),
+                form.user_sport_type(),
                 form.user_target_period());
     }
 
@@ -171,9 +175,9 @@ public class BodyDataController {
         List<Food> foodData = bodyDataInputService.getFoodDataForMonth(userId, firstDayOfMonth, lastDayOfMonth);
 
         // AIアドバイス取得
-        AiResponseData aiResponseData = aiResponseDataService.getAiResponseDataByUserId(userId);
-        String aiAdvice = aiResponseData.getAiAdvice();
-        float TargetCalories = aiResponseData.getTargetCalorie();
+        Optional<AiResponseData> aiResponseData = aiResponseDataService.getAiResponseDataByUserId(userId);
+        String aiAdvice = aiResponseData.map(AiResponseData::getAiAdvice).orElse("");
+        float TargetCalories = aiResponseData.map(AiResponseData::getTargetCalorie).orElse(0.0f);
 
         LocalDate lastDay = ym.equals(thisMonth) ? today : ym.atEndOfMonth();
 

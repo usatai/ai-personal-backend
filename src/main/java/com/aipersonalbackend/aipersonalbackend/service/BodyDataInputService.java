@@ -1,4 +1,4 @@
-package com.ai_personal_backend.ai_personal_backend.service;
+package com.aipersonalbackend.aipersonalbackend.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,14 +6,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ai_personal_backend.ai_personal_backend.controller.BodyDataForm;
-import com.ai_personal_backend.ai_personal_backend.controller.BodyProgressDataForm;
-import com.ai_personal_backend.ai_personal_backend.model.BodyData;
-import com.ai_personal_backend.ai_personal_backend.model.Food;
-import com.ai_personal_backend.ai_personal_backend.model.BodyProgressData;
-import com.ai_personal_backend.ai_personal_backend.repository.BodyDataInputRepository;
-import com.ai_personal_backend.ai_personal_backend.repository.BodyProgressDataRepository;
-import com.ai_personal_backend.ai_personal_backend.repository.FoodDataRepository;
+import com.aipersonalbackend.aipersonalbackend.controller.BodyDataForm;
+import com.aipersonalbackend.aipersonalbackend.controller.BodyProgressDataForm;
+import com.aipersonalbackend.aipersonalbackend.model.BodyData;
+import com.aipersonalbackend.aipersonalbackend.model.BodyProgressData;
+import com.aipersonalbackend.aipersonalbackend.model.Food;
+import com.aipersonalbackend.aipersonalbackend.repository.BodyDataInputRepository;
+import com.aipersonalbackend.aipersonalbackend.repository.BodyProgressDataRepository;
+import com.aipersonalbackend.aipersonalbackend.repository.FoodDataRepository;
 
 @Service
 public class BodyDataInputService {

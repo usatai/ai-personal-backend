@@ -1,7 +1,9 @@
-package com.ai_personal_backend.ai_personal_backend.repository;
+package com.aipersonalbackend.aipersonalbackend.repository;
 
 import org.springframework.stereotype.Repository;
-import com.ai_personal_backend.ai_personal_backend.model.BodyData;
+
+import com.aipersonalbackend.aipersonalbackend.model.BodyData;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

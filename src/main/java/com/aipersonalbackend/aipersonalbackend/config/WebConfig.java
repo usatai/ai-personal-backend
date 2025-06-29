@@ -1,4 +1,4 @@
-package com.ai_personal_backend.ai_personal_backend.config;
+package com.aipersonalbackend.aipersonalbackend.config;
 
 import java.util.List;
 

@@ -80,4 +80,8 @@ public class BodyDataInputService {
         return foodDataRepository.findFoodData(userId, firstDayOfMonth, lastDayOfMonth);
     }
 
+    public float getTargetWeight(Long userId) {
+        return bodyDataRepository.findByUserWeight(userId);
+    }
+
 }

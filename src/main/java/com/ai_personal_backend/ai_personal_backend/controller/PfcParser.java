@@ -17,7 +17,7 @@ public class PfcParser {
         float protein = 0, fat = 0, carb = 0;
 
         if (calMatcher.find()) {
-            calorie = Integer.parseInt(calMatcher.group(1));
+            calorie = Integer.parseInt(calMatcher.group(1).replace(",", ""));
         }
         if (pfcMatcher.find()) {
             protein = Float.parseFloat(pfcMatcher.group(1));

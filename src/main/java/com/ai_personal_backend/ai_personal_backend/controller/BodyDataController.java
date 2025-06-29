@@ -76,18 +76,23 @@ public class BodyDataController {
 
     private String generatePromptFromForm(BodyDataForm form) {
         return String.format("""
-                あなたは経験豊富なパーソナルトレーナーかつ管理栄養士です。
-                以下のクライアント情報をもとに、目標達成に向けて実行可能で現実的な「1ヶ月分の食事プラン」と「トレーニングメニュー概要」を日本語で詳細に提案してください。
+                あなたは経験豊富なパーソナルトレーナーであり、国家資格を持つ管理栄養士でもあります。
+                以下の詳細なクライアント情報をもとに、「現実的かつ実行可能な」 1ヶ月間の食事プランとトレーニングメニュー概要を日本語で具体的かつ詳細に提案してください。
 
                 提案の際は、以下の点に特に留意してください:
-                - 日本人の平均的な食生活・生活リズムを考慮すること
-                - クライアントの目標タイプに合わせて、減量・健康・増量のいずれかに適切なカロリー収支とPFCバランスを設計すること
-                - 食事は家庭でも再現可能な簡単な献立にすること（市販食品も可）
-                - トレーニングはジム未利用であれば自重中心、自宅でできるよう工夫すること
-                - PFCの単位はgで、数値も明記すること
-                - 朝/昼/夕/間食の例は複数日分（例: 各3日分）提示すると望ましい
-                - クライアントの運動タイプによってトレーニングメニューを設計、提案すること
-                - トレーニングメニューは1週間で見て休養日も含めた設計にしてください
+                ▼指示・前提条件
+                    日本人の平均的な生活リズム（会社員を想定。起床7時、昼食12時、夕食19時など）と食文化（和食・コンビニ食など）を考慮してください。
+                    目標タイプ（減量 / 健康維持 / 増量）に応じて、1日の摂取カロリーとPFCバランス（g）を数値で明記し、科学的根拠（軽くで良い）に基づいて設計してください。
+                    食事内容は家庭でも再現可能な簡単な献立とし、市販食品（コンビニ・冷凍食品・缶詰など）も活用可能としてください。
+                    各食事（朝/昼/夜/間食）の例は、3日分ずつ以上のバリエーションを具体的に提示してください。PFCの単位はgで、数値も明記すること
+
+                ▼トレーニングについては以下の点に注意してください:
+                    クライアントの運動タイプ（ジム / 自宅）に合わせて内容を調整
+                    週単位でトレーニング日・休養日を明示し、1週間のスケジュールとして提示
+                    部位別メニューや種目（例：スクワット、プランクなど）を具体的に記載
+                    自重トレ・チューブ・軽いダンベルなど家庭でも使える器具を活用可
+
+                補足事項として、食事制限のコツ・空腹対策・プロテイン活用・サプリの使い方・継続の工夫などの助言を含めてください。
 
                 ▼クライアント情報
                 - 現在の身長: %scm
@@ -104,10 +109,24 @@ public class BodyDataController {
                 【食事プラン】
                 ・1日の目標摂取カロリー:
                 ・目標PFCバランス（g）: タンパク質〇g / 脂質〇g / 炭水化物〇g
-                ・朝食例（複数日）:
-                ・昼食例（複数日）:
-                ・夕食例（複数日）:
-                ・間食例（任意）:
+                ・朝食例（3日分以上）:
+                - 例1:
+                - 例2:
+                - 例3:
+
+                ・昼食例（3日分以上）:
+                - 例1:
+                - 例2:
+                - 例3:
+
+                ・夕食例（3日分以上）:
+                - 例1:
+                - 例2:
+                - 例3:
+
+                ・間食例（任意・推奨される場合）:
+                - 例1:
+                - 例2:
 
                 【トレーニング概要】
                 ・月:
@@ -117,8 +136,12 @@ public class BodyDataController {
                 ・金:
                 ・土:
                 ・日:
-                ・主なトレーニングメニュー（部位ごとに分類可）:
-                ・備考（トレーニングの注意点、休養日、プロテインなどのサプリ活用など）:
+                ・主なトレーニングメニュー（胸、腕、背中、肩、脚の5分割でトレーニング時間1時間を想定して提案して）:
+                ・備考
+                - トレーニング時の注意点
+                - 食事制限中の空腹対策
+                - サプリメントの活用方法（例：プロテイン摂取タイミング）
+                - モチベーション維持の工夫
                 ---
                 """,
                 form.user_height(),
@@ -152,6 +175,14 @@ public class BodyDataController {
         }
     }
 
+    /**
+     * ユーザー情報取得
+     * @param userId
+     * @param year
+     * @param month
+     * @param session
+     * @return
+     */
     @GetMapping("userinfo")
     public ResponseEntity<?> userInfo(@RequestParam(required = false) Long userId,
             @RequestParam(required = false) Integer year,
@@ -177,11 +208,12 @@ public class BodyDataController {
         // AIアドバイス取得
         Optional<AiResponseData> aiResponseData = aiResponseDataService.getAiResponseDataByUserId(userId);
         String aiAdvice = aiResponseData.map(AiResponseData::getAiAdvice).orElse("");
-        float TargetCalories = aiResponseData.map(AiResponseData::getTargetCalorie).orElse(0.0f);
+        float targetCalories = aiResponseData.map(AiResponseData::getTargetCalorie).orElse(0.0f);
+        float targetWeight = bodyDataInputService.getTargetWeight(userId);
 
         LocalDate lastDay = ym.equals(thisMonth) ? today : ym.atEndOfMonth();
 
-        List<Map<String, Object>> todayMonth = new ArrayList<>();
+        List<Map<String, Object>> todayMonthData = new ArrayList<>();
         for (LocalDate date = ym.atDay(1); !date.isAfter(lastDay); date = date.plusDays(1)) {
             final LocalDate copy = date;
             Float weight = progress.stream()
@@ -201,15 +233,16 @@ public class BodyDataController {
                     .map(d -> d.getCalories())
                     .reduce(0f, Float::sum);
 
-            todayMonth.add(Map.of(
+            todayMonthData.add(Map.of(
                     "name", date.toString(),
                     "weight", weight,
                     "fat", fat,
                     "caloriesIntake", calories,
-                    "caloriesBurned", TargetCalories// 仮に固定値。あとで活動量計算できる
+                    "caloriesBurned", targetCalories,// 仮に固定値。あとで活動量計算できる
+                    "targetWeight",targetWeight
             ));
         }
 
-        return ResponseEntity.ok(Map.of("todayMonth", todayMonth,"aiAdvice",aiAdvice));
+        return ResponseEntity.ok(Map.of("todayMonth", todayMonthData,"aiAdvice",aiAdvice));
     }
 }

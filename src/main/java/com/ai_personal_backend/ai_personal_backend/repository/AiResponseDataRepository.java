@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface AiResponseDataRepository extends JpaRepository<AiResponseData, Long> {
     AiResponseData findByUserId(Long userId);
 
-    @Query("SELECT a FROM AiResponseData a WHERE a.userId = :userId ORDER BY a.createdAt DESC")
+    @Query("SELECT a FROM AiResponseData a WHERE a.userId = :userId ORDER BY a.createdAt DESC LIMIT 1")
     Optional<AiResponseData> findFirstByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 } 

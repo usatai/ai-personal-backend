@@ -3,25 +3,26 @@
 
     WORKDIR /workspace
     
-    # 1. Gradle Wrapper とプロジェクト設定
-    COPY build.gradle settings.gradle gradlew ./
-    COPY gradle gradle
+    # 依存解決用キャッシュのため、gradle関連を先にコピー
+    COPY gradlew build.gradle settings.gradle ./
+    COPY gradle/ gradle/
     
-    # 2. 依存解決
-    RUN ./gradlew build -x test
+    # 先に依存関係だけ解決（キャッシュ効かせる用）
+    RUN ./gradlew dependencies --no-daemon
     
-    # 3. アプリケーションのソースコード
-    COPY src src
+    # アプリケーション全体をコピーしてビルド
+    COPY . .
     
-    # 4. ビルド（再度、依存も含めて完全に）
-    RUN ./gradlew bootJar -x test
-
-# --- 2. 実行用ステージ ---
+    # bootJar を実行して jar 作成
+    RUN ./gradlew bootJar -x test --no-daemon
+    
+    # --- 2. 実行用ステージ ---
     FROM eclipse-temurin:21-jre-jammy
-
+    
     WORKDIR /app
-
+    
+    # build で生成された jar をコピー
     COPY --from=build /workspace/build/libs/*.jar app.jar
-
+    
     ENTRYPOINT ["java", "-jar", "/app/app.jar"]
     

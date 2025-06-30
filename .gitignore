@@ -38,4 +38,9 @@ out/
 
 .env
 
-application.properties
+application-local.properties
+
+# OS generated files
+.DS_Store
+
+*.csv

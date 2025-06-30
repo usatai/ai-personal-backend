@@ -1,34 +1,18 @@
-# Dockerfile
-
 # --- 1. ビルド用ステージ ---
-# Java 21のJDKが含まれたイメージをベースにする
-FROM eclipse-temurin:21-jdk-jammy AS build
+    FROM eclipse-temurin:21-jdk-jammy AS build
 
-# 作業ディレクトリを設定
-WORKDIR /workspace
-
-# Gradle Wrapperのファイルとbuild.gradleをコピー
-COPY build.gradle settings.gradle gradlew ./
-COPY gradle gradle
-
-# 依存関係をダウンロード（ソースコードをコピーする前に行うことで、キャッシュが効きやすくなる）
-RUN ./gradlew dependencies
-
-# アプリケーションのソースコードをコピー
-COPY src src
-
-# Gradleを使ってアプリケーションをビルド（テストはスキップ）
-RUN ./gradlew build -x test
-
-# --- 2. 実行用ステージ ---
-# より軽量なJRE（Java実行環境）のみのイメージをベースにする
-FROM eclipse-temurin:21-jre-jammy
-
-# 作業ディレクトリを設定
-WORKDIR /app
-
-# ビルド用ステージから、ビルドされたJARファイルのみをコピー
-COPY --from=build /workspace/build/libs/*.jar app.jar
-
-# コンテナが起動したときに実行するコマンド
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+    WORKDIR /workspace
+    
+    # 1. Gradle Wrapper とプロジェクト設定
+    COPY build.gradle settings.gradle gradlew ./
+    COPY gradle gradle
+    
+    # 2. 依存解決
+    RUN ./gradlew build -x test || true
+    
+    # 3. アプリケーションのソースコード
+    COPY src src
+    
+    # 4. ビルド（再度、依存も含めて完全に）
+    RUN ./gradlew bootJar -x test
+    
